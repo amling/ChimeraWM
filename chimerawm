@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+BEGIN
+{
+    use File::Basename;
+    use Cwd ('abs_path');
+
+    unshift @INC, dirname(abs_path($0)) . "/pm";
+}
+
+use ChimeraWM;
+
+ChimeraWM->main();
