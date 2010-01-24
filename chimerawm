@@ -15,4 +15,6 @@ BEGIN
 
 use ChimeraWM;
 
+die "Bad DISPLAY?" if($ENV{'DISPLAY'} ne ":1.0");
+
 ChimeraWM->main();
