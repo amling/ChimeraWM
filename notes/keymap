@@ -1,0 +1,9 @@
+There's some more tricky business with keymaps
+
+The root keymap should pass unrecognized through, but in a non-root keymaps,
+unknown keys should bail.  This can probably be handled with a default option
+in keymaps, the root one won't have one but others will/should.
+
+How to parse key descriptions in keymap hash?
+How to encourage no default in root and default outside root?
+    maybe have a RootKeyMap subclass...
