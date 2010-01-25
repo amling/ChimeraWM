@@ -14,6 +14,7 @@ sub structure_keys
     return
     [
         ['init', 'init', 'ChimeraWM::Cfg::Sub', 1, sub { }],
+        ['keymap', 'keymap', 'ChimeraWM::Cfg::KeyMap', 1, {}],
     ];
 }
 
