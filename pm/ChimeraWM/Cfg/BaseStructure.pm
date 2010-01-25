@@ -21,7 +21,7 @@ sub new
 
         if(defined($args{$args_key}))
         {
-            $self->{$this_key} = ChimeraWM::Cfg::new_magic($class, $args{$args_key});
+            $self->{$this_key} = ChimeraWM::Cfg::new_magic($class, delete($args{$args_key}));
         }
         elsif($has_default == 1)
         {
@@ -31,6 +31,11 @@ sub new
         {
             die "Missing key $args_key in construction of $class";
         }
+    }
+
+    if(%args)
+    {
+        die "Bad keys in args to construction of $class: " . join(", ", sort(keys(%args)));
     }
 
     return $self;
