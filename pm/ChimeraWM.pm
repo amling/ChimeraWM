@@ -3,19 +3,7 @@ package ChimeraWM;
 use strict;
 use warnings;
 
-sub new
-{
-    my $class = shift;
-
-    my $self = bless {}, $class;
-
-    return $self;
-}
-
-sub imain
-{
-    print "Hello, chimerical world!!!\n";
-}
+use ChimeraWM::Cfg::ChimeraWM;
 
 sub main
 {
@@ -38,7 +26,7 @@ sub main
         }
         else
         {
-            $rc = "ChimeraWM->new()";
+            $rc = "{}";
         }
     }
 
@@ -48,14 +36,9 @@ sub main
         die "Evaluating RC failed: $@";
     }
 
-    if(!UNIVERSAL::isa($wm, 'ChimeraWM'))
-    {
-        die "Evaluating RC did not produce ChimeraWM instance";
-    }
+    $wm = ChimeraWM::Cfg::ChimeraWM->newx($wm);
 
-    $wm->imain();
-
-    return 0;
+    return $wm->imain();
 }
 
 sub load_rc
