@@ -1,0 +1,18 @@
+Plan is to basically only allow simple window positioning strategies.  There is
+a collection of root frames, every frame is one of:
+
+*) Disabled, no window will ever map.
+*) Enabled, empty.
+*) Enabled, full of a window.
+*) A {h,v}split of two other frames.  (Maybe allow multi-splits or grid splits to avoid complication?)
+
+Root frame collections must be disjoint, but need not be exhaustive (useful
+e.g.  for Carl's crazy monitors).
+
+On init if there is no specified root frame set it should default to one of the
+strategies below.  It should be possible to redo root frames programmatically
+(e.g.  in key binding or externally run command).  Possible included/initial
+root framing strategies:
+
+*) One frame to rule them all (bounding box for X server)
+*) One frame per screen, any overlapping frames joined into their bounding box.
