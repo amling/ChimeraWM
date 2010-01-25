@@ -1,0 +1,50 @@
+my $x = X11::Protocol->new();
+
+$x->event_handler('queue');
+#my $error_handler = sub
+#{
+#    print "Error handler: " . Dumper(@_);
+#};
+#$x->error_handler($error_handler);
+
+my $ssr = $x->pack_event_mask('SubstructureRedirect');
+$x->ChangeWindowAttributes($x->{'root'}, 'event_mask' => $x->event_window_mask($ssr));
+my ($dummy1, $dummy2, @clients) = $x->QueryTree($x->{'root'});
+print "clients: " . Dumper(\@clients);
+# TODO: @clients is an array of client window numbers, take note of them
+
+my $i = 0;
+while(1)
+{
+    my %event = $x->next_event();
+    next unless(%event);
+    if($event{'name'} eq 'MapRequest')
+    {
+        $x->ConfigureWindow
+        (
+            $event{'window'},
+            'x' => $i * 100,
+            'y' => $i * 100,
+            'width' => 300,
+            'height' => 300,
+        );
+        $x->MapWindow($event{'window'});
+        ++$i;
+    }
+    elsif($event{'name'} eq 'ConfigureRequest')
+    {
+        my %cfg;
+        for my $key ('x', 'y', 'width', 'height', 'sibling', 'border_width')
+        {
+            if(defined($event{$key}))
+            {
+                $cfg{$key} = $event{$key};
+            }
+        }
+        $x->ConfigureWindow($event{'window'}, %cfg);
+    }
+    else
+    {
+        print "Unknown event: " . Dumper(\%event);
+    }
+}
