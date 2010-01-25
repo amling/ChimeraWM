@@ -29,6 +29,24 @@ sub imain
     my $ssr = $x->pack_event_mask('SubstructureRedirect', 'SubstructureNotify');
     $x->ChangeWindowAttributes($x->{'root'}, 'event_mask' => $x->event_window_mask($ssr));
 
+    my $min = $x->min_keycode();
+    my $max = $x->max_keycode();
+    my (@keys) = $x->GetKeyboardMapping($min, ($max - $min) + 1);
+    my $xcode;
+    my $keycode = $min;
+    for my $ks (@keys) {
+        for (@{$ks}) {
+            if($_ == ord("x")) {
+                $xcode = $keycode;
+                last;
+            }
+        }
+        last if(defined($xcode));
+        $keycode++;
+    }
+    die unless(defined($xcode));
+    $x->GrabKey($xcode, 0x04, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
+
     my ($dummy1, $dummy2, @clients) = $x->QueryTree($x->{'root'});
     for my $client (@clients)
     {
