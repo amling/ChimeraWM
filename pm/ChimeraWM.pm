@@ -3,7 +3,7 @@ package ChimeraWM;
 use strict;
 use warnings;
 
-use ChimeraWM::Cfg::ChimeraWM;
+use ChimeraWM::Cfg;
 
 sub main
 {
@@ -30,13 +30,13 @@ sub main
         }
     }
 
-    my $wm = eval $rc;
+    my $wm = ChimeraWM::Cfg->eval_cfg($rc);
     if($@)
     {
         die "Evaluating RC failed: $@";
     }
 
-    $wm = ChimeraWM::Cfg::ChimeraWM->newx($wm);
+    $wm = ChimeraWM::Cfg::wm($wm);
 
     return $wm->imain();
 }

@@ -1,4 +1,4 @@
-package ChimeraWM::Cfg::ChimeraWM;
+package ChimeraWM::Cfg::WM;
 
 use strict;
 use warnings;
@@ -25,5 +25,7 @@ sub imain
 
     return $self->{'exit'} || 0;
 }
+
+ChimeraWM::Cfg::export_class_alias('wm', __PACKAGE__);
 
 1;

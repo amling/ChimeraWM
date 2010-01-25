@@ -5,26 +5,6 @@ use warnings;
 
 use Data::Dumper;
 
-# This module is how magic shit like this is going to work
-#
-# ChimeraWM->new(
-#     init => sub { ... },
-#     at_e1_foo => ChimeraWM::Cfg::SimpleFoo->newx("foo"),
-#     at_e2_foo => ChimeraWM::Cfg::ComplexFoo->new(
-#         bar1 => ChimeraWM::Cfg::Bar->new(arg => "baz"),
-#         bar2 =>
-#         {
-#             "arg" => "baz"
-#         },
-#         bar2 =>
-#         [
-#             "arg" => "baz"
-#         ],
-#         subfoo => "other really simple foo",
-#     )
-#     at_e3_foo => "really simple foo",
-# );
-
 sub newx
 {
     my $class = shift;
