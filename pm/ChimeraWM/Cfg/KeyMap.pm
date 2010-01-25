@@ -21,7 +21,7 @@ sub new
     {
         my $value = $args{$key};
 
-        $value = ChimeraWM::Cfg::KeyAction->newx($value);
+        $value = ChimeraWM::Cfg::new_magic('ChimeraWM::Cfg::KeyAction', $value);
 
         $self->{'actions'}->{$key} = $value;
     }

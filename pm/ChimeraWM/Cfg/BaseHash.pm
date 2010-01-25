@@ -3,10 +3,6 @@ package ChimeraWM::Cfg::BaseHash;
 use strict;
 use warnings;
 
-use ChimeraWM::Cfg::Base;
-
-use base ('ChimeraWM::Cfg::Base');
-
 sub new_from_hash
 {
     my ($class, $hashref) = @_;

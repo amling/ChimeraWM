@@ -21,11 +21,11 @@ sub new
 
         if(defined($args{$args_key}))
         {
-            $self->{$this_key} = $class->newx($args{$args_key});
+            $self->{$this_key} = ChimeraWM::Cfg::new_magic($class, $args{$args_key});
         }
         elsif($has_default == 1)
         {
-            $self->{$this_key} = $class->newx($default);
+            $self->{$this_key} = ChimeraWM::Cfg::new_magic($class, $default);
         }
         elsif($has_default == -1)
         {
