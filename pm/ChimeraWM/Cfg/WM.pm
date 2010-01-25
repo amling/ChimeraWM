@@ -29,6 +29,9 @@ sub imain
     my $ssr = $x->pack_event_mask('SubstructureRedirect', 'SubstructureNotify');
     $x->ChangeWindowAttributes($x->{'root'}, 'event_mask' => $x->event_window_mask($ssr));
 
+    grab($x, "x");
+    my $grabbed = "x";
+
     my ($dummy1, $dummy2, @clients) = $x->QueryTree($x->{'root'});
     for my $client (@clients)
     {
@@ -85,6 +88,25 @@ sub imain
         {
             # TODO: note, make sure to handle even if we've never seen it before
         }
+        elsif($event{'name'} eq 'KeyPress')
+        {
+            print "Pressed C-" . uc($grabbed) . "\n";
+            ungrab($x);
+            if($grabbed eq "x")
+            {
+                grab($x, "y");
+                $grabbed = "y";
+            }
+            else
+            {
+                grab($x, "x");
+                $grabbed = "x";
+            }
+            # TODO: note, make sure to handle even if we've never seen it before
+        }
+        elsif($event{'name'} eq 'KeyRelease')
+        {
+        }
         else
         {
             print "Unknown event: " . Dumper(\%event);
@@ -92,6 +114,37 @@ sub imain
     }
 
     return $self->{'exit'} || 0;
+}
+
+sub grab
+{
+    my $x = shift;
+    my $letter = shift;
+
+    my $min = $x->min_keycode();
+    my $max = $x->max_keycode();
+    my (@keys) = $x->GetKeyboardMapping($min, ($max - $min) + 1);
+    my $xcode;
+    my $keycode = $min;
+    for my $ks (@keys) {
+        for (@{$ks}) {
+            if($_ == ord($letter)) {
+                $xcode = $keycode;
+                last;
+            }
+        }
+        last if(defined($xcode));
+        $keycode++;
+    }
+    die unless(defined($xcode));
+    $x->GrabKey($xcode, 0x04, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
+}
+
+sub ungrab
+{
+    my $x = shift;
+
+    $x->UngrabKey('Any', 0x04, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
 }
 
 ChimeraWM::Cfg::export_class_alias('wm', __PACKAGE__);
