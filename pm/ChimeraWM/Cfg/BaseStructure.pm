@@ -19,14 +19,6 @@ sub new
     {
         my ($this_key, $args_key, $class, $has_default, $default) = @$cfg;
 
-        # do our damnedest to load the file
-        {
-            my $classfile = $class;
-            $classfile =~ s/::/\//g;
-            $classfile .= "\.pm";
-            eval { require $classfile; }
-        }
-
         if(defined($args{$args_key}))
         {
             $self->{$this_key} = $class->newx($args{$args_key});
