@@ -101,9 +101,15 @@ sub imain
                     grab($x, 0x0, "y");
                     $grabbed = "y";
                 }
-                else
+                elsif($grabbed eq "y")
                 {
                     ungrab($x, 0x0, "y");
+                    grab($x, undef, undef);
+                    $grabbed = "*";
+                }
+                else
+                {
+                    ungrab($x, undef, undef);
                     grab($x, 0x04, "x");
                     $grabbed = "C-x";
                 }
@@ -134,22 +140,34 @@ sub grab
     my $mod = shift;
     my $letter = shift;
 
-    my $min = $x->min_keycode();
-    my $max = $x->max_keycode();
-    my (@keys) = $x->GetKeyboardMapping($min, ($max - $min) + 1);
-    my $xcode;
-    my $keycode = $min;
-    for my $ks (@keys) {
-        for (@{$ks}) {
-            if($_ == ord($letter)) {
-                $xcode = $keycode;
-                last;
-            }
-        }
-        last if(defined($xcode));
-        $keycode++;
+    if(!defined($mod))
+    {
+        $mod = 'Any';
     }
-    die unless(defined($xcode));
+
+    my $xcode;
+    if(!defined($letter))
+    {
+        $xcode = 'Any';
+    }
+    else
+    {
+        my $min = $x->min_keycode();
+        my $max = $x->max_keycode();
+        my (@keys) = $x->GetKeyboardMapping($min, ($max - $min) + 1);
+        my $keycode = $min;
+        for my $ks (@keys) {
+            for (@{$ks}) {
+                if($_ == ord($letter)) {
+                    $xcode = $keycode;
+                    last;
+                }
+            }
+            last if(defined($xcode));
+            $keycode++;
+        }
+        die unless(defined($xcode));
+    }
     $x->GrabKey($xcode, $mod, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
 print "Grabbed $xcode/$mod\n";
 }
@@ -160,22 +178,34 @@ sub ungrab
     my $mod = shift;
     my $letter = shift;
 
-    my $min = $x->min_keycode();
-    my $max = $x->max_keycode();
-    my (@keys) = $x->GetKeyboardMapping($min, ($max - $min) + 1);
-    my $xcode;
-    my $keycode = $min;
-    for my $ks (@keys) {
-        for (@{$ks}) {
-            if($_ == ord($letter)) {
-                $xcode = $keycode;
-                last;
-            }
-        }
-        last if(defined($xcode));
-        $keycode++;
+    if(!defined($mod))
+    {
+        $mod = 'Any';
     }
-    die unless(defined($xcode));
+
+    my $xcode;
+    if(!defined($letter))
+    {
+        $xcode = 'Any';
+    }
+    else
+    {
+        my $min = $x->min_keycode();
+        my $max = $x->max_keycode();
+        my (@keys) = $x->GetKeyboardMapping($min, ($max - $min) + 1);
+        my $keycode = $min;
+        for my $ks (@keys) {
+            for (@{$ks}) {
+                if($_ == ord($letter)) {
+                    $xcode = $keycode;
+                    last;
+                }
+            }
+            last if(defined($xcode));
+            $keycode++;
+        }
+        die unless(defined($xcode));
+    }
     $x->UngrabKey($xcode, $mod, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
 print "Ungrabbed $xcode/$mod\n";
 }
