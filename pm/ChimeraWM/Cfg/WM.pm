@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use ChimeraWM::Cfg::BaseStructure;
+use ChimeraWM::XW;
 use Data::Dumper;
 use X11::Protocol;
 
@@ -25,6 +26,7 @@ sub imain
     $self->{'init'}->call();
 
     my $x = X11::Protocol->new();
+    my $xw = ChimeraWM::XW->new($x);
     $x->event_handler('queue');
     my $ssr = $x->pack_event_mask('SubstructureRedirect', 'SubstructureNotify');
     $x->ChangeWindowAttributes($x->{'root'}, 'event_mask' => $x->event_window_mask($ssr));
