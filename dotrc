@@ -1,0 +1,12 @@
+my %km;
+# silly demo
+#for my $l (split(//, "abcdefghijklmnopqrstuvwxyz"))
+#{
+#    $km{"c-$l"} = sub { print "Hello, World, c-$l\n"; };
+#    $km{"s-c-$l"} = sub { print "Hello, World, c-" . uc($l) . "\n"; };
+#}
+wm
+(
+    init => sub { print "HW\n"; },
+    keymap => \%km,
+)

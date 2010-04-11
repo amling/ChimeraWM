@@ -5,4 +5,9 @@ use warnings;
 
 # marker
 
+sub fire
+{
+    die;
+}
+
 1;

@@ -37,18 +37,42 @@ sub new
             $name_to_kc{$name} = $keycode;
 #print "KeyCode for $name is $keycode\n";
         }
-        ++$keycode;
     }
 
     my $self =
     {
         'name_to_kc' => \%name_to_kc,
         'kc_to_cname' => \%kc_to_cname,
+        'name_to_warned' => {},
     };
 
     bless $self, $class;
 
     return $self;
+}
+
+sub name_to_kc
+{
+    my $self = shift;
+    my $name = shift;
+
+    my $kc = $self->{'name_to_kc'}->{$name};
+    if(defined($kc))
+    {
+        return $kc;
+    }
+
+    my $warned = $self->{'name_to_warned'}->{$name};
+    if($warned)
+    {
+        return undef;
+    }
+
+    warn "Unknown key name: $name";
+
+    $self->{'name_to_warned'}->{$name} = 1;
+
+    return undef;
 }
 
 1;

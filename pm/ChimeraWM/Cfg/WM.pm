@@ -46,6 +46,8 @@ sub imain
     }
 
     # TODO: grab top level keymap onto server
+    my $current_keymap = $self->{'keymap'};
+    $current_keymap->grab($xw, 1);
 
     while(1)
     {
@@ -89,8 +91,27 @@ sub imain
         {
             # TODO: note, make sure to handle even if we've never seen it before
         }
-        # TODO: KeyPress, to current grabbed keymap for interp, then either it will either install a replacement or we should reset back to normal keymap.  Maybe we should reset to normal first and wait for the replacement when we interpret the key?
-        # TODO: KeyRelease, mostly just to avoid unknown
+        elsif($event{'name'} eq 'KeyPress')
+        {
+            my $km = $current_keymap;
+            $current_keymap = undef;
+            $x->UngrabKey('Any', 'Any', $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
+
+            my $action = $km->interp($xw, 1, \%event);
+            if(defined($action))
+            {
+                $action->call();
+            }
+
+            if(!defined($current_keymap))
+            {
+                $current_keymap = $self->{'keymap'};
+                $current_keymap->grab($xw, 1);
+            }
+        }
+        elsif($event{'name'} eq 'KeyRelease')
+        {
+        }
         else
         {
             print "Unknown event: " . Dumper(\%event);

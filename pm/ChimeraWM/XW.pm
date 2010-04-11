@@ -24,6 +24,13 @@ sub new
     return $self;
 }
 
+sub get_x
+{
+    my $self = shift;
+
+    return $self->{'x'};
+}
+
 sub get_cache
 {
     my $self = shift;

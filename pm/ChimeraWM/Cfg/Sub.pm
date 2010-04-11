@@ -19,7 +19,7 @@ sub call
 {
     my $self = shift;
 
-    $self->{'sub'}->();
+    $self->{'sub'}->(@_);
 }
 
 1;

@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use ChimeraWM::Cfg::BaseHash;
-use ChimeraWM::Cfg::KeyAction;
 
 use base ('ChimeraWM::Cfg::BaseHash');
 
@@ -21,10 +20,12 @@ sub new
     {
         my $value = $args{$key};
 
-        $value = ChimeraWM::Cfg::new_magic('ChimeraWM::Cfg::KeyAction', $value);
+        $value = ChimeraWM::Cfg::new_magic('ChimeraWM::Cfg::Sub', $value);
 
         $self->{'actions'}->{$key} = $value;
     }
+
+    return $self;
 }
 
 sub grab
@@ -112,9 +113,9 @@ sub interp_desc
     my $mod = 0;
     while(1)
     {
-        my $key0 = 0;
-        $mod |= 0x01 if($key =~ s/^(Shift|S)[-+]//);
-        $mod |= 0x04 if($key =~ s/^(Ctrl|Control|C)[-+]//);
+        my $key0 = $key;
+        $mod |= 0x01 if($key =~ s/^(shift|s)[-+]//i);
+        $mod |= 0x04 if($key =~ s/^(ctrl|control|c)[-+]//i);
         # TODO: more mods (alt, modN)
         last if($key eq $key0);
     }
