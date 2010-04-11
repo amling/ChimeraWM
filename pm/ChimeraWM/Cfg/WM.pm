@@ -29,8 +29,8 @@ sub imain
     my $ssr = $x->pack_event_mask('SubstructureRedirect', 'SubstructureNotify');
     $x->ChangeWindowAttributes($x->{'root'}, 'event_mask' => $x->event_window_mask($ssr));
 
-    grab($x, "x");
-    my $grabbed = "x";
+    grab($x, 0x04, "x");
+    my $grabbed = "C-x";
 
     my ($dummy1, $dummy2, @clients) = $x->QueryTree($x->{'root'});
     for my $client (@clients)
@@ -90,17 +90,18 @@ sub imain
         }
         elsif($event{'name'} eq 'KeyPress')
         {
-            print "Pressed C-" . uc($grabbed) . "\n";
-            ungrab($x);
-            if($grabbed eq "x")
+            print "Pressed $grabbed: " . Dumper(\%event);
+            if($grabbed eq "C-x")
             {
-                grab($x, "y");
+                ungrab($x, 0x04, "x");
+                grab($x, 0x0, "y");
                 $grabbed = "y";
             }
             else
             {
-                grab($x, "x");
-                $grabbed = "x";
+                ungrab($x, 0x0, "y");
+                grab($x, 0x04, "x");
+                $grabbed = "C-x";
             }
             # TODO: note, make sure to handle even if we've never seen it before
         }
@@ -119,6 +120,7 @@ sub imain
 sub grab
 {
     my $x = shift;
+    my $mod = shift;
     my $letter = shift;
 
     my $min = $x->min_keycode();
@@ -137,14 +139,34 @@ sub grab
         $keycode++;
     }
     die unless(defined($xcode));
-    $x->GrabKey($xcode, 0x04, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
+    $x->GrabKey($xcode, $mod, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
+print "Grabbed $xcode/$mod\n";
 }
 
 sub ungrab
 {
     my $x = shift;
+    my $mod = shift;
+    my $letter = shift;
 
-    $x->UngrabKey('Any', 0x04, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
+    my $min = $x->min_keycode();
+    my $max = $x->max_keycode();
+    my (@keys) = $x->GetKeyboardMapping($min, ($max - $min) + 1);
+    my $xcode;
+    my $keycode = $min;
+    for my $ks (@keys) {
+        for (@{$ks}) {
+            if($_ == ord($letter)) {
+                $xcode = $keycode;
+                last;
+            }
+        }
+        last if(defined($xcode));
+        $keycode++;
+    }
+    die unless(defined($xcode));
+    $x->UngrabKey($xcode, $mod, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
+print "Ungrabbed $xcode/$mod\n";
 }
 
 ChimeraWM::Cfg::export_class_alias('wm', __PACKAGE__);
