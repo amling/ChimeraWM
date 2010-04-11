@@ -3,6 +3,7 @@ my %km;
 #for my $l (split(//, "abcdefghijklmnopqrstuvwxyz"))
 #{
 #    $km{"c-$l"} = sub { print "Hello, World, c-$l\n"; };
+#    $km{"a-$l"} = sub { print "Hello, World, a-$l\n"; };
 #    $km{"s-c-$l"} = sub { print "Hello, World, c-" . uc($l) . "\n"; };
 #}
 wm

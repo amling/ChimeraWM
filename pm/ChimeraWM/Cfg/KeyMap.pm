@@ -114,9 +114,10 @@ sub interp_desc
     while(1)
     {
         my $key0 = $key;
-        $mod |= 0x01 if($key =~ s/^(shift|s)[-+]//i);
-        $mod |= 0x04 if($key =~ s/^(ctrl|control|c)[-+]//i);
-        # TODO: more mods (alt, modN)
+        $mod |= 0x01 if($key =~ s/^(?:shift|s)[-+]//i);
+        $mod |= 0x04 if($key =~ s/^(?:ctrl|control|c)[-+]//i);
+        $mod |= 0x08 if($key =~ s/^(?:alt|a)[-+]//i);
+        $mod |= (0x04 << $1) if($key =~ s/^(?:mod|m)([0-9])[-+]//i);
         last if($key eq $key0);
     }
 
