@@ -16,33 +16,55 @@ sub new_magic
         return $arg;
     }
 
-    my $self;
-    if($arg =~ /^-?\d+$/ && $class->UNIVERSAL::can('new_from_int'))
+    my $ref = ref($arg);
+    if(!defined($ref))
     {
-        $self = $class->new_from_int($arg);
-    }
-    elsif(!defined(ref($arg)) && $class->UNIVERSAL::can('new_from_str'))
-    {
-        $self = $class->new_from_str($arg);
-    }
-    elsif(ref($arg) eq "CODE" && $class->UNIVERSAL::can('new_from_sub'))
-    {
-        $self = $class->new_from_sub($arg);
-    }
-    elsif(ref($arg) eq "HASH" && $class->UNIVERSAL::can('new_from_hash'))
-    {
-        $self = $class->new_from_hash($arg);
-    }
-    elsif(ref($arg) eq "ARRAY" && $class->UNIVERSAL::can('new_from_array'))
-    {
-        $self = $class->new_from_array($arg);
+        if($arg =~ /^-?\d+$/ && $class->UNIVERSAL::can('new_from_int'))
+        {
+            return $class->new_from_int($arg);
+        }
+        if($class->UNIVERSAL::can('new_from_str'))
+        {
+            return $class->new_from_str($arg);
+        }
     }
     else
     {
-        die "Cannot construct " . $class . " instance from " . Dumper($arg);
+        if($ref eq "CODE")
+        {
+            if($class->UNIVERSAL::can('new_from_sub'))
+            {
+                return $class->new_from_sub($arg);
+            }
+        }
+        elsif($ref eq "HASH")
+        {
+            if($class->UNIVERSAL::can('new_from_hash'))
+            {
+                return $class->new_from_hash($arg);
+            }
+        }
+        elsif($ref eq "ARRAY")
+        {
+            if($class->UNIVERSAL::can('new_from_array'))
+            {
+                return $class->new_from_array($arg);
+            }
+        }
+        else
+        {
+            if($class->UNIVERSAL::can('new_from_obj'))
+            {
+                my $self = $class->new_from_obj($arg);
+                if(defined($self))
+                {
+                    return $self;
+                }
+            }
+        }
     }
 
-    return $self;
+    die "Cannot construct " . $class . " instance from " . Dumper($arg);
 }
 
 sub eval_cfg
