@@ -45,6 +45,12 @@ if(0)
     my $magic_str = "Now is the time";
     $km{"c-x"} = make_magic_keymap("c-x", "Now is the time");
 }
+# keymap typing demo
+if(0)
+{
+    # TODO: hold ctrl, hit x, hit y doesn't work (requires frop of ctrl between x and y)
+    $km{"c-x"} = keymap("c-y" => sub { print "ZZY!\n"; });
+}
 wm
 (
     init => sub { print "HW\n"; },

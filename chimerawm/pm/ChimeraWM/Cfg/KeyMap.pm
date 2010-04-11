@@ -27,8 +27,7 @@ sub new
 
         my $value = $args{$key};
 
-        # TODO: maybe reinvent KeyAction?  Then KeyMap could be its own implicit install action
-        $value = ChimeraWM::Cfg::new_magic('ChimeraWM::Cfg::Sub', $value);
+        $value = ChimeraWM::Cfg::new_magic('ChimeraWM::Cfg::KeyAction', $value);
 
         $self->{'actions'}->{$key} = $value;
     }

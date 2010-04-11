@@ -9,62 +9,70 @@ use File::Find;
 sub new_magic
 {
     my $class = shift;
-    my $arg = shift;
+    my $arg0 = shift;
+    my $arg = $arg0;
 
-    if(UNIVERSAL::isa($arg, $class))
+    while(1)
     {
-        return $arg;
-    }
+        if(UNIVERSAL::isa($arg, $class))
+        {
+            return $arg;
+        }
 
-    my $ref = ref($arg);
-    if(!defined($ref))
-    {
-        if($arg =~ /^-?\d+$/ && $class->UNIVERSAL::can('new_from_int'))
+        my $newArg;
+
+        my $ref = ref($arg);
+        if(!defined($ref))
         {
-            return $class->new_from_int($arg);
-        }
-        if($class->UNIVERSAL::can('new_from_str'))
-        {
-            return $class->new_from_str($arg);
-        }
-    }
-    else
-    {
-        if($ref eq "CODE")
-        {
-            if($class->UNIVERSAL::can('new_from_sub'))
+            if($arg =~ /^-?\d+$/ && $class->UNIVERSAL::can('new_from_int'))
             {
-                return $class->new_from_sub($arg);
+                $newArg = $class->new_from_int($arg);
             }
-        }
-        elsif($ref eq "HASH")
-        {
-            if($class->UNIVERSAL::can('new_from_hash'))
+            if($class->UNIVERSAL::can('new_from_str'))
             {
-                return $class->new_from_hash($arg);
-            }
-        }
-        elsif($ref eq "ARRAY")
-        {
-            if($class->UNIVERSAL::can('new_from_array'))
-            {
-                return $class->new_from_array($arg);
+                $newArg = $class->new_from_str($arg);
             }
         }
         else
         {
-            if($class->UNIVERSAL::can('new_from_obj'))
+            if($ref eq "CODE")
             {
-                my $self = $class->new_from_obj($arg);
-                if(defined($self))
+                if($class->UNIVERSAL::can('new_from_sub'))
                 {
-                    return $self;
+                    $newArg = $class->new_from_sub($arg);
+                }
+            }
+            elsif($ref eq "HASH")
+            {
+                if($class->UNIVERSAL::can('new_from_hash'))
+                {
+                    $newArg = $class->new_from_hash($arg);
+                }
+            }
+            elsif($ref eq "ARRAY")
+            {
+                if($class->UNIVERSAL::can('new_from_array'))
+                {
+                    $newArg = $class->new_from_array($arg);
+                }
+            }
+            else
+            {
+                if($class->UNIVERSAL::can('new_from_obj'))
+                {
+                    $newArg = $class->new_from_obj($arg);
                 }
             }
         }
-    }
 
-    die "Cannot construct " . $class . " instance from " . Dumper($arg);
+        if(defined($newArg))
+        {
+            $arg = $newArg;
+            next;
+        }
+
+        die "Cannot construct " . $class . " instance from " . Dumper($arg0, $arg);
+    }
 }
 
 sub eval_cfg
