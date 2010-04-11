@@ -19,6 +19,8 @@ sub new
 
     bless $self, $class;
 
+#$self->get_cache("KeyCodes");
+
     return $self;
 }
 
