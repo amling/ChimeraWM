@@ -43,6 +43,8 @@ sub imain
         # TODO: take note of/move $client as a number of a mapped window
     }
 
+    # TODO: grab top level keymap onto server
+
     while(1)
     {
         my %event = $x->next_event();
@@ -85,6 +87,8 @@ sub imain
         {
             # TODO: note, make sure to handle even if we've never seen it before
         }
+        # TODO: KeyPress, to current grabbed keymap for interp, then either it will either install a replacement or we should reset back to normal keymap.  Maybe we should reset to normal first and wait for the replacement when we interpret the key?
+        # TODO: KeyRelease, mostly just to avoid unknown
         else
         {
             print "Unknown event: " . Dumper(\%event);

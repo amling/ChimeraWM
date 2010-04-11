@@ -27,4 +27,25 @@ sub new
     }
 }
 
+sub grab
+{
+    my $self = shift;
+    my $xw = shift;
+
+    # TODO: grab self all over the X server
+}
+
+sub interp
+{
+    my $self = shift;
+    my $xw = shift;
+    my $event = shift;
+
+    # TODO: interpret event in the keymap and return the associated action (or
+    # undef on a miss)
+
+    # TODO: oh shift, what does X even let us do on a miss?
+    # TODO: maybe disallow misses?  root shouldn't have them and others should handle them via default
+}
+
 1;
