@@ -45,7 +45,6 @@ sub imain
         # TODO: take note of/move $client as a number of a mapped window
     }
 
-    # TODO: grab top level keymap onto server
     my $current_keymap = $self->{'keymap'};
     $current_keymap->grab($xw, 1);
 
