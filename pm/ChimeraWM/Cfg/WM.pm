@@ -31,6 +31,8 @@ sub imain
 
     grab($x, 0x04, "x");
     my $grabbed = "C-x";
+    my $ct = 0;
+    my $ctm = 3;
 
     my ($dummy1, $dummy2, @clients) = $x->QueryTree($x->{'root'});
     for my $client (@clients)
@@ -91,17 +93,26 @@ sub imain
         elsif($event{'name'} eq 'KeyPress')
         {
             print "Pressed $grabbed: " . Dumper(\%event);
-            if($grabbed eq "C-x")
+            if(++$ct == $ctm)
             {
-                ungrab($x, 0x04, "x");
-                grab($x, 0x0, "y");
-                $grabbed = "y";
+                if($grabbed eq "C-x")
+                {
+                    ungrab($x, 0x04, "x");
+                    grab($x, 0x0, "y");
+                    $grabbed = "y";
+                }
+                else
+                {
+                    ungrab($x, 0x0, "y");
+                    grab($x, 0x04, "x");
+                    $grabbed = "C-x";
+                }
+                $ct = 0;
+                print "Switched to $grabbed\n";
             }
             else
             {
-                ungrab($x, 0x0, "y");
-                grab($x, 0x04, "x");
-                $grabbed = "C-x";
+                print "Expect " . ($ctm - $ct) . " more\n";
             }
             # TODO: note, make sure to handle even if we've never seen it before
         }
