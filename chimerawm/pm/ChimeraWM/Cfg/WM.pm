@@ -15,7 +15,7 @@ sub structure_keys
     return
     [
         ['init', 'init', 'ChimeraWM::Cfg::Sub', 1, sub { }],
-        ['keymap', 'keymap', 'ChimeraWM::Cfg::KeyMap', 1, {}],
+        ['root_keymap', 'keymap', 'ChimeraWM::Cfg::KeyMap', 1, {}],
     ];
 }
 
@@ -23,13 +23,14 @@ sub imain
 {
     my $self = shift;
 
-    $self->{'init'}->call();
-
     my $x = X11::Protocol->new();
     my $xw = ChimeraWM::XW->new($x);
     $x->event_handler('queue');
     my $ssr = $x->pack_event_mask('SubstructureRedirect', 'SubstructureNotify');
     $x->ChangeWindowAttributes($x->{'root'}, 'event_mask' => $x->event_window_mask($ssr));
+
+    $self->{'x'} = $x;
+    $self->{'xw'} = $xw;
 
     my ($dummy1, $dummy2, @clients) = $x->QueryTree($x->{'root'});
     for my $client (@clients)
@@ -45,8 +46,9 @@ sub imain
         # TODO: take note of/move $client as a number of a mapped window
     }
 
-    my $current_keymap = $self->{'keymap'};
-    $current_keymap->grab($xw, 1);
+    $self->{'init'}->call();
+
+    $self->enter_keymap($self->{'root_keymap'}, 1, 1);
 
     while(1)
     {
@@ -92,21 +94,24 @@ sub imain
         }
         elsif($event{'name'} eq 'KeyPress')
         {
-            my $km = $current_keymap;
-            $current_keymap = undef;
-            $x->UngrabKey('Any', 'Any', $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
-
-            my $action = $km->interp($xw, 1, \%event);
-            if(defined($action))
+            my ($km, $is_root) = $self->exit_keymap();
+            my $desc = $xw->get_cache("KeyCodes")->interp_pair($event{'detail'}, $event{'state'});
+            if(!defined($km))
             {
-                $action->call();
+                warn "Got KeyPress of $desc with no current keymap?!";
+            }
+            else
+            {
+                my $action = $km->interp($xw, $is_root, \%event);
+                if(defined($action))
+                {
+                    # TODO: action should probably get to know the keypress which it will probably need in some intelligible form
+                    # TODO: very hard to decide exactly what action should know about, maybe some sort of infernal KeyActionEvent object?
+                    $action->call($self, $is_root);
+                }
             }
 
-            if(!defined($current_keymap))
-            {
-                $current_keymap = $self->{'keymap'};
-                $current_keymap->grab($xw, 1);
-            }
+            $self->enter_keymap($self->{'root_keymap'}, 1, 1);
         }
         elsif($event{'name'} eq 'KeyRelease')
         {
@@ -118,6 +123,36 @@ sub imain
     }
 
     return $self->{'exit'} || 0;
+}
+
+sub enter_keymap
+{
+    my $self = shift;
+    my $km = shift;
+    my $is_root = shift || 0;
+    my $is_optional = shift || 0;
+
+    return if($self->{'current_keymap'} && $is_optional);
+
+    $self->{'current_keymap'} = $km;
+    $self->{'current_keymap_is_root'} = $is_root;
+    $km->grab($self->{'xw'}, $is_root)
+}
+
+sub exit_keymap
+{
+    my $self = shift;
+
+    my $km = $self->{'current_keymap'};
+    my $is_root = $self->{'current_keymap_is_root'};
+
+    $self->{'current_keymap'} = undef;
+    if(defined($km))
+    {
+        $self->{'x'}->UngrabKey('Any', 'Any', $self->{'x'}->{'root'}, 0, 'Asynchronous', 'Asynchronous');
+    }
+
+    return ($km, $is_root);
 }
 
 ChimeraWM::Cfg::export_class_alias('wm', __PACKAGE__);

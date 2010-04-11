@@ -1,11 +1,50 @@
 my %km;
-# silly demo
-#for my $l (split(//, "abcdefghijklmnopqrstuvwxyz"))
-#{
-#    $km{"c-$l"} = sub { print "Hello, World, c-$l\n"; };
-#    $km{"a-$l"} = sub { print "Hello, World, a-$l\n"; };
-#    $km{"s-c-$l"} = sub { print "Hello, World, c-" . uc($l) . "\n"; };
-#}
+# silly demo one, giant programmatic keymap
+if(0)
+{
+    for my $l (split(//, "abcdefghijklmnopqrstuvwxyz"))
+    {
+        $km{"c-$l"} = sub { print "Hello, World, c-$l\n"; };
+        $km{"a-$l"} = sub { print "Hello, World, a-$l\n"; };
+        $km{"s-c-$l"} = sub { print "Hello, World, c-" . uc($l) . "\n"; };
+    }
+}
+# silly demo two, c-x typing "test" (chained keymap demo)
+if(0)
+{
+    sub make_magic_keymap
+    {
+        my $k0 = shift;
+        my $str = shift;
+
+        return sub
+        {
+            my $wm = shift;
+
+            print "Received $k0 successfully...\n";
+
+            if($str eq "")
+            {
+                print "Complete!\n";
+                return;
+            }
+
+            my $k = substr($str, 0, 1);
+            if($k ne lc($k))
+            {
+                $k = "s-" . lc($k);
+            }
+            my $km =
+            {
+                $k => make_magic_keymap($k, substr($str, 1)),
+                '*' => sub { print "You fail!\n"; },
+            };
+            $wm->enter_keymap(keymap($km));
+        };
+    }
+    my $magic_str = "Now is the time";
+    $km{"c-x"} = make_magic_keymap("c-x", "Now is the time");
+}
 wm
 (
     init => sub { print "HW\n"; },

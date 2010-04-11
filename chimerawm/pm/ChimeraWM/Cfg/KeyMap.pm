@@ -15,9 +15,16 @@ sub new
     my $self = bless {}, $class;
 
     $self->{'actions'} = {};
+    $self->{'want_nop'} = 0;
 
     for my $key (keys(%args))
     {
+        # sort of ghetto...
+        if($key eq "_WANT_NOP")
+        {
+            $self->{'want_nop'} = 1;
+        }
+
         my $value = $args{$key};
 
         $value = ChimeraWM::Cfg::new_magic('ChimeraWM::Cfg::Sub', $value);
@@ -50,7 +57,7 @@ sub grab
         }
         else
         {
-            my ($keycode, $mod) = $self->interp_desc($xw, $key);
+            my ($keycode, $mod) = $xw->get_cache("KeyCodes")->interp_desc($key);
             $x->GrabKey($keycode, $mod, $x->{'root'}, 0, 'Asynchronous', 'Asynchronous');
         }
     }
@@ -77,7 +84,7 @@ sub interp
         }
         else
         {
-            my ($keycode, $mod) = $self->interp_desc($xw, $key);
+            my ($keycode, $mod) = $xw->get_cache("KeyCodes")->interp_desc($key);
             next unless(defined($keycode));
             next if($keycode != $event_keycode);
             next if($mod != $event_mod);
@@ -86,48 +93,39 @@ sub interp
         }
     }
 
-    # TODO: interpret to be human readable (will need reverse mod table)
+    # this is complicated
+    if(!$self->{'want_nop'})
+    {
+        my $is_nop = $xw->get_cache("KeyCodes")->is_nop_key($event_keycode);
+        if($is_nop)
+        {
+            my $reinstall = sub
+            {
+                my $wm = shift;
+                my $is_root = shift;
+
+                $wm->enter_keymap($self, $is_root);
+            };
+            return ChimeraWM::Cfg::new_magic('ChimeraWM::Cfg::Sub', $reinstall);
+        }
+    }
+
     if($is_root)
     {
-        warn "Got keypress $event_keycode/$event_mod, not present in root keymap?!  Ignoring...";
+        warn "Got keypress " . $xw->get_cache("KeyCodes")->interp_pair($event_keycode, $event_mod) . ", not present in root keymap?!  Ignoring...";
         return;
     }
 
     if(!defined($default))
     {
         # TODO: user-visible message (tunable)
-        print "Got keypress $event_keycode/$event_mod, not present in keymap?\n";
+        print "Got keypress " . $xw->get_cache("KeyCodes")->interp_pair($event_keycode, $event_mod) . ", not present in keymap?\n";
         return;
     }
 
     return $default;
 }
 
-sub interp_desc
-{
-    my $self = shift;
-    my $xw = shift;
-    my $key = shift;
-
-    # TODO: less ghetto?
-    my $mod = 0;
-    while(1)
-    {
-        my $key0 = $key;
-        $mod |= 0x01 if($key =~ s/^(?:shift|s)[-+]//i);
-        $mod |= 0x04 if($key =~ s/^(?:ctrl|control|c)[-+]//i);
-        $mod |= 0x08 if($key =~ s/^(?:alt|a)[-+]//i);
-        $mod |= (0x04 << $1) if($key =~ s/^(?:mod|m)([0-9])[-+]//i);
-        last if($key eq $key0);
-    }
-
-    my $kc = $xw->get_cache("KeyCodes")->name_to_kc($key);
-    if(!defined($kc))
-    {
-        return ();
-    }
-
-    return ($kc, $mod);
-}
+ChimeraWM::Cfg::export_class_alias('keymap', __PACKAGE__);
 
 1;
